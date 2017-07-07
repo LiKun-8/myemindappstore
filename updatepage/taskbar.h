@@ -2,7 +2,10 @@
 #define TASKBAR_H
 
 #include <QWidget>
+#include <QTableWidget>
+#include <QScrollArea>
 #include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QLabel>
 #include <QPushButton>
 

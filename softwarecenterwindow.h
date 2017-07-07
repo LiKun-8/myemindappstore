@@ -14,10 +14,9 @@
 #include <QTableWidget>
 
 #include <ClassAndMorePage/classwidget.h>
-#include <ClassAndMorePage/showmore.h>
-#include "updatepage/taskbar.h"
-#include "updatepage/appwidget.h"
-#include "updatepage/funcwidget.h"
+#include "ClassAndMorePage/showmore.h"
+#include "updatepage/updatepage.h"
+#include "managerpage/managerpage.h"
 #include "managerpage/managerwidget.h"
 
 #define HOMEPAGE 0
@@ -39,10 +38,8 @@ protected slots:
     void OnBtnClass();
     void OnBtnUpdate();
     void OnBtnManager();
-    void PageUpdateBtnClicked();
     void SetMoreShow(int category);
-    void StrLenChanged();
-    void TextAreaChanged(int hig);
+
 
 private:
     QPushButton *btnReturn;
@@ -71,8 +68,8 @@ private:
 
     QWidget *pageHome;
     QWidget *pageClass;
-    QWidget *pageUpdate;
-    QWidget *pageManager;
+    UpdatePage *pageUpdate;
+    ManagerPage *pageManager;
     QWidget *pageMore;
 
     //class page
@@ -92,27 +89,6 @@ private:
     void InitMainWindow();
     void SetCurrentPage(int page);
     void CreateClassWindow();
-    void CreateUpdateWindow();
-    void CreateManagerWindow();
-
-    /*** updatepage variable ***/
-    QWidget *pageUpdateWidget;
-    TaskBar *updTaskBar;
-    QTableWidget *updateTable;
-    QVBoxLayout *upVLayout;
-    QScrollArea *upScroArea;
-
-    //managerpage
-    QVBoxLayout *vboxLayout;
-    QVBoxLayout *vboxLayout1;
-    QVBoxLayout *vboxLayout2;
-    TaskBar *manTaskBar;
-    TaskBar *manCompBar;
-    QTableWidget *installTable;
-    QTableWidget *compTable;
-    QLabel *splitLabel;
-    ManagerWidget *compManager;
-    QScrollArea *manScroArea;
 
     void CreateMorewindow();
     bool event(QEvent *event);

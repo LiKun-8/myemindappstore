@@ -22,7 +22,9 @@ SOURCES += main.cpp \
     updatepage/appwidget.cpp \
     updatepage/funcwidget.cpp \
     updatepage/taskbar.cpp \
-    managerpage/managerwidget.cpp
+    managerpage/managerwidget.cpp \
+    updatepage/updatepage.cpp \
+    managerpage/managerpage.cpp
 
 HEADERS  += \
     softwarecenterwindow.h \
@@ -34,7 +36,9 @@ HEADERS  += \
     updatepage/appwidget.h \
     updatepage/funcwidget.h \
     updatepage/taskbar.h \
-    managerpage/managerwidget.h
+    managerpage/managerwidget.h \
+    updatepage/updatepage.h \
+    managerpage/managerpage.h
 
 RESOURCES += \
     images.qrc
