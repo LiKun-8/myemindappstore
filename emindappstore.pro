@@ -24,7 +24,8 @@ SOURCES += main.cpp \
     updatepage/taskbar.cpp \
     managerpage/managerwidget.cpp \
     updatepage/updatepage.cpp \
-    managerpage/managerpage.cpp
+    managerpage/managerpage.cpp \
+    updatepage/pkupdates.cpp
 
 HEADERS  += \
     softwarecenterwindow.h \
@@ -38,7 +39,8 @@ HEADERS  += \
     updatepage/taskbar.h \
     managerpage/managerwidget.h \
     updatepage/updatepage.h \
-    managerpage/managerpage.h
+    managerpage/managerpage.h \
+    updatepage/pkupdates.h
 
 RESOURCES += \
     images.qrc
@@ -47,3 +49,7 @@ DISTFILES += \
     README.md \
     updatepage/image/head.png \
     updatepage/image/hide.png
+
+INCLUDEPATH += /usr/include/packagekitqt5/PackageKit
+
+LIBS += /usr/lib/x86_64-linux-gnu/libpackagekitqt5.so

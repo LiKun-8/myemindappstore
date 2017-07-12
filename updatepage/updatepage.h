@@ -4,6 +4,9 @@
 #include <QWidget>
 #include <QTableWidget>
 #include <QScrollArea>
+#include <QPointer>
+#include <packagekitqt5/PackageKit/Daemon>
+#include <packagekitqt5/PackageKit/Transaction>
 #include "taskbar.h"
 #include "appwidget.h"
 #include "funcwidget.h"
@@ -16,6 +19,8 @@ public:
     void CreateUpdateWindow();
     void getUpdates();
 
+    int count() const;
+
 private:
     QWidget *pageUpdateWidget;
     TaskBar *updTaskBar;
@@ -23,12 +28,16 @@ private:
     QVBoxLayout *upVLayout;
     QScrollArea *upScroArea;
     bool event(QEvent *event);
+
+
 signals:
+    void done();
 
 public slots:
     void PageUpdateBtnClicked();
     void StrLenChanged();
     void TextAreaChanged(int hig);
+
 };
 
 #endif // UPDATEPAGE_H

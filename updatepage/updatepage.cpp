@@ -1,9 +1,15 @@
 #include <QHeaderView>
+#include <QDebug>
+#include <QLoggingCategory>
+#include <packagekitqt5/PackageKit/Transaction>
 #include "updatepage.h"
+#include "pkupdates.h"
 
 UpdatePage::UpdatePage(QWidget *parent) : QWidget(parent)
 {
-       CreateUpdateWindow();
+    PkUpdates * upd = new PkUpdates(this);
+    upd->checkUpdates();
+    CreateUpdateWindow();
 }
 
 void UpdatePage::CreateUpdateWindow()
@@ -70,7 +76,6 @@ void UpdatePage::CreateUpdateWindow()
     upScroArea->setWidgetResizable(true);
 
 }
-
 
 void UpdatePage::PageUpdateBtnClicked()
 {
@@ -179,5 +184,6 @@ bool UpdatePage::event(QEvent *event)
     }
     return QWidget::event(event);
 }
+
 
 
