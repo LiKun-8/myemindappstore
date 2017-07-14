@@ -32,14 +32,14 @@ ClassTop::ClassTop()
     vbTopLayout->setMargin(0);
     vbTopLayout->addLayout(hbTopLayout);
     vbTopLayout->addWidget(lineTop);
-    vbTopLayout->setContentsMargins(16,0,16,0);
+    vbTopLayout->setContentsMargins(16,0,4,0);
 
     widget->setLayout(vbTopLayout);
     widget->setMaximumHeight(48);
     btnTop->setFocusPolicy(Qt::NoFocus);
     btnTop->setMaximumWidth(48);
-    btnTop->setStyleSheet("text-align: right;");//设置按钮文字显示位置
-    btnTop->setStyleSheet("background-color: rgb(255, 128, 64);");//设置按钮背景颜色
+    btnTop->setObjectName("btnTop");
+//    btnTop->setStyleSheet("text-align: right;");//设置按钮文字显示位置
     btnTop->setCursor(Qt::PointingHandCursor);
     connect(btnTop,SIGNAL(clicked(bool)),this,SLOT(sendSlotBtn()));
 }

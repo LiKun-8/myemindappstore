@@ -28,6 +28,11 @@ TaskBar::TaskBar(QWidget *parent,QString taskstr,QString onekeystr):QWidget(pare
     setLayout(hbLayout);
 }
 
+void TaskBar::setTaskLabel(QString taskStr)
+{
+    taskLabel->setText(taskStr);
+}
+
 void TaskBar::hideOnekeyButton()
 {
     onekeyButton->hide();

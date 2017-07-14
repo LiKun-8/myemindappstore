@@ -1,4 +1,5 @@
 #include "softwarecenterwindow.h"
+#include <QFile>
 #include <QDebug>
 #include <QHeaderView>
 
@@ -14,6 +15,7 @@ SoftwareCenterWindow::SoftwareCenterWindow(QWidget *parent)
 
     //初始化窗口
     InitMainWindow();
+
 
     //上部布局
     hbLayout->addWidget(btnReturn);
@@ -41,6 +43,11 @@ SoftwareCenterWindow::SoftwareCenterWindow(QWidget *parent)
     connect(btnClass,SIGNAL(clicked(bool)),this,SLOT(OnBtnClass()));
     connect(btnUpdate,SIGNAL(clicked(bool)),this,SLOT(OnBtnUpdate()));
     connect(btnManager,SIGNAL(clicked(bool)),this,SLOT(OnBtnManager()));
+
+    QFile file(":/style.qss");
+    file.open(QFile::ReadOnly);
+    QString style = QLatin1String(file.readAll());
+    this->setStyleSheet(style);
 }
 
 SoftwareCenterWindow::~SoftwareCenterWindow()
@@ -91,21 +98,15 @@ void SoftwareCenterWindow::InitMainWindow()
     stwWindow->setMaximumWidth(1200);
 
     pageHome = new QWidget();
-    pageClass = new QWidget();
+    pageClass = new ClassPage();
     pageUpdate = new UpdatePage();
     pageManager = new ManagerPage();
-    pageMore = new QWidget();
 
     stwWindow->addWidget(pageHome);
     stwWindow->addWidget(pageClass);
     stwWindow->addWidget(pageUpdate);
     stwWindow->addWidget(pageManager);
-    stwWindow->addWidget(pageMore);
-
-    label1 = new QLabel(pageHome);
-    label1->setText("HOME");
-    label2 = new QLabel(pageClass);
-    label2->setText("CLASS");
+    stwWindow->addWidget(pageClass->moreClassWidget);
 
     btnHome->setFocusPolicy(Qt::NoFocus);
     btnManager->setFocusPolicy(Qt::NoFocus);
@@ -115,69 +116,11 @@ void SoftwareCenterWindow::InitMainWindow()
     btnClass->setFocusPolicy(Qt::NoFocus);
     btnUpdate->setFocusPolicy(Qt::NoFocus);
 
-    vbClasslayoutMore = new QVBoxLayout();
-    moreClassWidget = new ShowMore();
-    scrollClass = new QScrollArea(pageClass);
-    scrollMore = new QScrollArea(pageMore);
-
-    CreateClassWindow();
-    CreateMorewindow();
-}
-
-
-void SoftwareCenterWindow::CreateClassWindow()
-{
-    int catenum = 4;
-    classWidget = new ClassWidget[catenum];
-    vbClasslayout = new QVBoxLayout();
-    pageClassWidget = new QWidget();
-
-    vbClasslayout = new QVBoxLayout();
-    scrollClass->setFrameShape(QFrame::NoFrame); //去除窗口边框
-
-    for(int i=0;i<catenum;i++)
-    {
-        connect(&classWidget[i],SIGNAL(moreShow(int)),this,SLOT(SetMoreShow(int)));
-        classWidget[i].setCategory(i);
-        classWidget[i].setTopName();
-        vbClasslayout->addWidget(classWidget[i].widget);
-    }
-
-    for(int i = 0;i<catenum;i++)
-    {
-        classWidget[i].initElement();
-    }
-
-    pageClassSpacer =new QSpacerItem(24,24,QSizePolicy::Minimum,QSizePolicy::Expanding);
-    scrollClass->setWidget(pageClassWidget);
-    vbClasslayout->addSpacerItem(pageClassSpacer);
-    vbClasslayout->setMargin(0);
-    pageClassWidget->setLayout(vbClasslayout);
-    //滚动条不可见，只能通过鼠标滑动
-    scrollClass->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    scrollClass->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    scrollClass->setWidgetResizable(true);
+    connect(pageClass,SIGNAL(setMore()),this,SLOT(onBtnMore()));
 }
 
 
 
-void SoftwareCenterWindow::CreateMorewindow()
-{
-    pageMoreWidget = new QWidget();
-    vbClasslayoutMore = new QVBoxLayout();
-    scrollMore->setFrameShape(QFrame::NoFrame); //去除窗口边框
-    vbClasslayoutMore->addWidget(moreClassWidget->moreWidget);
-
-    pageMoreSpacer =new QSpacerItem(24,24,QSizePolicy::Minimum,QSizePolicy::Expanding);
-    scrollMore->setWidget(pageMoreWidget);
-    vbClasslayoutMore->addSpacerItem(pageMoreSpacer);
-    vbClasslayoutMore->setMargin(0);
-    pageMoreWidget->setLayout(vbClasslayoutMore);
-    //滚动条不可见，只能通过鼠标滑动
-    scrollMore->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    scrollMore->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    scrollMore->setWidgetResizable(true);
-}
 
 bool SoftwareCenterWindow::event(QEvent *event)
 {
@@ -203,7 +146,6 @@ void SoftwareCenterWindow::OnBtnHome()
 void SoftwareCenterWindow::OnBtnClass()
 {
     SetCurrentPage(CLASSPAGE);
-    scrollClass->resize(stwWindow->size().width(),stwWindow->size().height());
 }
 
 void SoftwareCenterWindow::OnBtnUpdate()
@@ -218,10 +160,9 @@ void SoftwareCenterWindow::OnBtnManager()
     SetCurrentPage(MANAGERPAGE);
 }
 
-void SoftwareCenterWindow::SetMoreShow(int category)
+void SoftwareCenterWindow::onBtnMore()
 {
     SetCurrentPage(MOREPAGE);
-    scrollMore->resize(stwWindow->size().width(),stwWindow->size().height());
 }
 
 //跳转指定页面

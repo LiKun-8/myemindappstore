@@ -40,7 +40,7 @@ private:
     QVBoxLayout *vbTopLayout;
 
 signals:
-    void showAll(int i);
+    void showAll(int flag);
 
 protected slots:
     void sendSlotBtn();

@@ -14,6 +14,7 @@ class TaskBar : public QWidget
     Q_OBJECT
 public:
     explicit TaskBar(QWidget *parent,QString taskstr,QString onekeystr);
+    void setTaskLabel(QString taskStr);
     void hideOnekeyButton();
 private:
     QHBoxLayout *hbLayout;

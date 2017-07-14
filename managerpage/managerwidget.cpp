@@ -1,4 +1,4 @@
-#include "managerwidget.h"
+ #include "managerwidget.h"
 
 ManagerWidget::ManagerWidget(QWidget *parent,QString namestr, QString verstr, QString sizestr) : QWidget(parent)
 {    

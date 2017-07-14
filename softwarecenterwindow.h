@@ -13,8 +13,8 @@
 #include <QScrollArea>
 #include <QTableWidget>
 
-#include <ClassAndMorePage/classwidget.h>
-#include "ClassAndMorePage/showmore.h"
+#include <ClassAndMorePage/classpage.h>
+#include "ClassAndMorePage/morepage.h"
 #include "updatepage/updatepage.h"
 #include "managerpage/managerpage.h"
 #include "managerpage/managerwidget.h"
@@ -38,7 +38,7 @@ protected slots:
     void OnBtnClass();
     void OnBtnUpdate();
     void OnBtnManager();
-    void SetMoreShow(int category);
+    void onBtnMore();
 
 
 private:
@@ -67,10 +67,9 @@ private:
     QSpacerItem *rightSpace;
 
     QWidget *pageHome;
-    QWidget *pageClass;
+    ClassPage *pageClass;
     UpdatePage *pageUpdate;
     ManagerPage *pageManager;
-    QWidget *pageMore;
 
     //class page
     ClassWidget *classWidget;//分类对象

@@ -3,34 +3,57 @@
 #include <QLoggingCategory>
 #include <packagekitqt5/PackageKit/Transaction>
 #include "updatepage.h"
-#include "pkupdates.h"
 
 UpdatePage::UpdatePage(QWidget *parent) : QWidget(parent)
 {
-    PkUpdates * upd = new PkUpdates(this);
+    upd = new PkUpdates(this);
     upd->checkUpdates();
-    CreateUpdateWindow();
+
+    createUpdateWindow();
 }
 
-void UpdatePage::CreateUpdateWindow()
+void UpdatePage::createUpdateWindow()
 {
     upScroArea = new QScrollArea(this);
-    upScroArea->resize(this->width(),this->height());
-    upScroArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    upScroArea->resize(960,640);
+    upScroArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     upScroArea->setFrameShape(QFrame::NoFrame);
     pageUpdateWidget = new QWidget();
 
-    updTaskBar = new TaskBar(0,"5个应用可升级","全部更新");
     updateTable = new QTableWidget(this);
-    int rowCount = 12;
-    updateTable->setColumnCount(1);
-    updateTable->setRowCount(rowCount);
+//    updateTable->setBaseSize(960,640);
+    updateTable->setShowGrid(false);
     updateTable->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     updateTable->setFrameShape(QFrame::NoFrame);
     updateTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     updateTable->setFocusPolicy(Qt::NoFocus);
-    updateTable->resizeColumnToContents(0);
-    updateTable->setShowGrid(false);
+
+    updTaskBar = new TaskBar(this,"0个应用可升级","全部更新");
+    connect(upd,SIGNAL(getUpdFinished(QStringList)),this,SLOT(onGetupFinished(QStringList)));
+
+    upVLayout = new QVBoxLayout();
+    upVLayout->setMargin(16);
+    upVLayout->addWidget(updTaskBar);
+    upVLayout->addWidget(updateTable);
+    this->setLayout(upVLayout);
+
+    pageUpdateWidget->setLayout(upVLayout);
+    upScroArea->setWidget(pageUpdateWidget);
+    upScroArea->setWidgetResizable(true);
+}
+
+void UpdatePage::onGetupFinished(QStringList nameList)
+{
+    qDebug() << endl << __FUNCTION__ ;
+    int rowCount = nameList.length();
+    qDebug() << "rowCount:" << rowCount ;
+    QString countStr = QString::number(rowCount, 10);
+    QString upStr = countStr + "个应用可升级" ;
+    updTaskBar->setTaskLabel(upStr);
+    updateTable->setColumnCount(1);
+    updateTable->setRowCount(rowCount);
+
+//    updateTable->resizeColumnToContents(0);
     updateTable->setStyleSheet(
                 "QTableWidget {"
                 "background-color: #00000000;"
@@ -53,31 +76,24 @@ void UpdatePage::CreateUpdateWindow()
     QHeaderView *hheaderView = updateTable->horizontalHeader();
     hheaderView->setHidden(true);
 
-    for(int i = 0; i < updateTable->rowCount(); i++)
+    for(int i = 0; i < rowCount; i++)
     {
-        AppWidget* appWidget = new AppWidget();
+        QString appName =  nameList.at(i);
+//        qDebug() << "appName : " << appName;
+        AppWidget* appWidget = new AppWidget(this,appName);
         updateTable->setCellWidget(i,0,appWidget);
 
-        connect(appWidget->headButton,SIGNAL(clicked()),this,SLOT(PageUpdateBtnClicked()));
-        connect(appWidget->nameButton,SIGNAL(clicked()),this,SLOT(PageUpdateBtnClicked()));
-        connect(appWidget->funcButton,SIGNAL(clicked()),this,SLOT(PageUpdateBtnClicked()));
-        connect(appWidget->updateButton,SIGNAL(clicked()),this,SLOT(PageUpdateBtnClicked()));
-        connect(appWidget,SIGNAL(sigIntroResize()),this,SLOT(StrLenChanged()));
+        connect(appWidget->headButton,SIGNAL(clicked()),this,SLOT(pageUpdateBtnClicked()));
+        connect(appWidget->nameButton,SIGNAL(clicked()),this,SLOT(pageUpdateBtnClicked()));
+        connect(appWidget->funcButton,SIGNAL(clicked()),this,SLOT(pageUpdateBtnClicked()));
+        connect(appWidget->updateButton,SIGNAL(clicked()),this,SLOT(pageUpdateBtnClicked()));
+        connect(appWidget,SIGNAL(sigIntroResize()),this,SLOT(strLenChanged()));
     }
-
-    upVLayout = new QVBoxLayout();
-    upVLayout->setMargin(16);
-    upVLayout->addWidget(updTaskBar);
-    upVLayout->addWidget(updateTable);
-    this->setLayout(upVLayout);
-
-    pageUpdateWidget->setLayout(upVLayout);
-    upScroArea->setWidget(pageUpdateWidget);
-    upScroArea->setWidgetResizable(true);
-
+    updateTable->setRowHeight(0,95);
+    updateTable->setRowHeight(0,96);
 }
 
-void UpdatePage::PageUpdateBtnClicked()
+void UpdatePage::pageUpdateBtnClicked()
 {
     for(int i = 0; i < updateTable->rowCount(); i++)
     {
@@ -106,8 +122,8 @@ void UpdatePage::PageUpdateBtnClicked()
             appWidget->funcButton->setEnabled(false);
             updateTable->setMinimumHeight(tableHeight + rowHeight);
 
-            connect(nfuncWidget->hideButton,SIGNAL(clicked()),this,SLOT(PageUpdateBtnClicked()));
-            connect(nfuncWidget,SIGNAL(sigTextHeight(int)),this,SLOT(TextAreaChanged(int)));
+            connect(nfuncWidget->hideButton,SIGNAL(clicked()),this,SLOT(pageUpdateBtnClicked()));
+            connect(nfuncWidget,SIGNAL(sigTextHeight(int)),this,SLOT(textAreaChanged(int)));
 
             break;
         }
@@ -134,7 +150,7 @@ void UpdatePage::PageUpdateBtnClicked()
     }
 }
 
-void UpdatePage::StrLenChanged()
+void UpdatePage::strLenChanged()
 {
     for(int i = 0; i < updateTable->rowCount(); i++)
     {
@@ -155,14 +171,13 @@ void UpdatePage::StrLenChanged()
             if(fontSize > labelWidth)
             {
                 fmstr = fm.elidedText(chLabelWidth->introstr, Qt::ElideRight, labelWidth - 70);
-
             }
             chLabelWidth->introLabel->setText(fmstr);
         }
     }
 }
 
-void UpdatePage::TextAreaChanged(int hig)
+void UpdatePage::textAreaChanged(int hig)
 {
     for(int i = 0; i < updateTable->rowCount(); i++)
     {

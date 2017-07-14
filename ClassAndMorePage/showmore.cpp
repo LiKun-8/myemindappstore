@@ -1,11 +1,8 @@
 #include "showmore.h"
 #include <QDebug>
-//#include "jsonfunc.h"
-#define MAXNUMBER 180
-
-extern QMap<int,QString> cateMap;
-//extern QMap<int,SORTSTRUCT>  sortStrMap;
-extern QMap<int,int> sortElementNum;
+#define MAXNUMBER 360
+#define SHOWMOREROW 72
+#define SHOWMORECOLUMN 5
 
 ShowMore::ShowMore(QWidget *parent) : QWidget(parent)
 {
@@ -19,18 +16,19 @@ ShowMore::ShowMore(QWidget *parent) : QWidget(parent)
     moreWidget->setMinimumSize(640,0);
     moreWidget->installEventFilter(this);
     eleLayout->setContentsMargins(16,0,16,0);
+    elementNumber = 0;
 
-    int test = 0;
-    for(int i = 0;i<36;i++)
+    int maxEleNumber = 0;
+    for(int i = 0;i<SHOWMOREROW;i++)
     {
-        for(int j = 0;j<5;j++)
+        for(int j = 0;j<SHOWMORECOLUMN;j++)
         {
-            eleLayout->addWidget(moreElement[test].baseWidget,i,j,1,1,Qt::AlignLeft);
-            moreElement[test].baseWidget->hide();
+            eleLayout->addWidget(moreElement[maxEleNumber].baseWidget,i,j,1,1,Qt::AlignLeft);
+            moreElement[maxEleNumber].baseWidget->hide();
 
-            if(test < (MAXNUMBER-1))
+            if(maxEleNumber < (MAXNUMBER-1))
             {
-                test++;
+                maxEleNumber++;
             }
             else
             {
@@ -47,47 +45,73 @@ ShowMore::ShowMore(QWidget *parent) : QWidget(parent)
 }
 
 //设置软件名字
-void ShowMore::setElementName(int category)
+void ShowMore::setElementName(int category, const CLASSSTRUCTMAP &classStruct)
 {
-//    if(sortStrMap.isEmpty())
-//    {
-//        qDebug()<<"the sortstr is empty!"<<endl;
-//    }
+     if(classStruct.isEmpty())
+    {
+        qDebug()<<"the sortstr is empty!"<<endl;
+    }
 
-//    QMap<int,SORTSTRUCT>::iterator item = sortStrMap.begin();
+    QMap<int,CLASSSTRUCT>::const_iterator item = classStruct.begin();
 
-//    int showNum = 0;
-//    for(;item != sortStrMap.end();++item)
-//    {
-//        if(item.value().category == (category+1))
-//        {
-//            moreElement[showNum].setBtnName(item.value().btnname);
-//            moreElement[showNum].baseWidget->show();
-//            showNum++;
-//        }
-//    }
+    int showNum = 0;
+    for(;item != classStruct.end();++item)
+    {
+        if(item.value().category == (category+1))
+        {
+            moreElement[showNum].setBtnName(item.value().proName);
+            moreElement[showNum].baseWidget->show();
+            moreElement[showNum].setProductId(item.key());
+            showNum++;
+        }
+    }
 
-//    for(int hideNum = showNum;hideNum<MAXNUMBER;hideNum++)
-//    {
-//        moreElement[hideNum].baseWidget->hide();
-
-//    }
+    for(int hideNum = showNum;hideNum<MAXNUMBER;hideNum++)
+    {
+        moreElement[hideNum].baseWidget->hide();
+    }
 }
 
 //设置软件类名字
-void ShowMore::setTopName(int category)
+void ShowMore::setTopName(int category, const CATEGORYMAP &cateGoryMap)
 {
-//    categoryFlag = category;
-//    if(cateMap.isEmpty())
-//    {
-//        qDebug()<<"the cateMap is empty!"<<endl;
-//    }
+    categoryFlag = category;
+    if(cateGoryMap.isEmpty())
+    {
+        qDebug()<<"the cateMap is empty!"<<endl;
+    }
 
-//    if(cateMap.contains(category+1))
-//    {
-//        QMap<int,QString>::iterator it = cateMap.find(category+1);
-//        moreClassTop->setLabelData(it.value());
-//    }
+    if(cateGoryMap.contains(category+1))
+    {
+        QMap<int,QString>::const_iterator it = cateGoryMap.find(category+1);
+        moreClassTop->setLabelData(it.value());
+    }
+
+}
+
+void ShowMore::setElementNum(const ELEMENTNUMBERMAP &elementNum)
+{
+    QMap<int,int>::const_iterator it = elementNum.find(categoryFlag+1);
+    elementNumber = it.value();
+}
+
+void ShowMore::setElementImage(int category, const CLASSSTRUCTMAP &classStructMap)
+{
+    if(classStructMap.isEmpty())
+    {
+        qDebug()<<"the sortstr is empty!"<<endl;
+    }
+
+    int showNum = 0;
+    QMap<int,CLASSSTRUCT>::const_iterator item = classStructMap.begin();
+    for(;item != classStructMap.end(); ++item)
+    {
+        if(item.value().category == (category+1))
+        {
+            moreElement[showNum].setBtnImage(item.value().proImage);
+            showNum++;
+        }
+    }
 }
 
 bool ShowMore::eventFilter(QObject *watched, QEvent *event)
@@ -101,19 +125,16 @@ bool ShowMore::eventFilter(QObject *watched, QEvent *event)
                 return true;
             }
 
-//            QMap<int,int>::iterator it = sortElementNum.find(categoryFlag+1);
-//            int numElement = it.value();
-            int numElement = 15;
             int column = (moreWidget->size().width()+48)/192;
             int row;
 
-            if(numElement%column == 0)
+            if(elementNumber%column == 0)
             {
-                row  = (numElement/column);
+                row  = (elementNumber/column);
             }
             else
             {
-                row  = (numElement/column)+1;
+                row  = (elementNumber/column)+1;
             }
 
 
@@ -138,10 +159,9 @@ bool ShowMore::eventFilter(QObject *watched, QEvent *event)
             {
                 for(int j=0;j<column;j++)
                 {
-
                     eleLayout->addWidget(moreElement[num].baseWidget,i,j,1,1,Qt::AlignLeft);
 
-                    if(num<(numElement-1))
+                    if(num<(elementNumber-1))
                     {
                         num++;
                     }
@@ -153,22 +173,20 @@ bool ShowMore::eventFilter(QObject *watched, QEvent *event)
             }
 
             //为不够一行的软件类添加空控件，使布局好看
-            for(int i = 0;i<(column - numElement);++i)
+            for(int i = 0;i<(column - elementNumber);++i)
             {
-                eleLayout->addWidget(&spaceWidget[i],0,numElement+i,1,1,Qt::AlignLeft);
+                eleLayout->addWidget(&spaceWidget[i],0,elementNumber+i,1,1,Qt::AlignLeft);
             }
 
             //隐藏多余的控件
-            if(numElement>column)
+            if(elementNumber>column)
             {
-                for(int i = numElement;i<MAXNUMBER;i++)
+                for(int i = elementNumber;i<MAXNUMBER;i++)
                 {
-
                     moreElement[i].baseWidget->hide();
                 }
-                for(int i = 0;i<numElement;i++)
+                for(int i = 0;i<elementNumber;i++)
                 {
-
                     moreElement[i].baseWidget->show();
                 }
             }

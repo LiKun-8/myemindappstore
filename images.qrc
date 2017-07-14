@@ -4,5 +4,6 @@
         <file>image/refresh.png</file>
         <file>image/return.png</file>
         <file>image/search.png</file>
+        <file>style.qss</file>
     </qresource>
 </RCC>

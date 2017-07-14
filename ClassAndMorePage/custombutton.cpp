@@ -13,11 +13,11 @@ CustomButton::~CustomButton()
 
 void CustomButton::enterEvent(QEvent *)
 {
-    setStyleSheet("QPushButton{background: dodgerblue;}");
+    setStyleSheet("QPushButton{background: dodgerblue;border:1px groove;border-radius:2px;border-color:#c8c8c8;}");
 }
 
 void CustomButton::leaveEvent(QEvent *)
 {
-    setStyleSheet("QPushButton{background: none;}");
+    setStyleSheet("QPushButton{border:1px groove;border-radius:2px;border-color:#c8c8c8;}");
 }
 

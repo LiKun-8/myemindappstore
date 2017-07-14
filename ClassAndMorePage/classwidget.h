@@ -1,14 +1,19 @@
 #ifndef CLASSWIDGETH
 #define CLASSWIDGETH
 #include <QMainWindow>
+#include <QLayoutItem>
+#include <QLabel>
+#include <QVector>
+#include <QDebug>
+#include <QScrollArea>
+
 #include "element.h"
 #include "classtop.h"
-#include <QLabel>
+#include "classwidget.h"
+#include "jsonfunc.h"
+
 #define MARGIN 32;
 #define SPACING 192;
-#include <QWidget>
-#include <QLayoutItem>
-
 
 class ClassWidget : public QWidget
 {
@@ -18,10 +23,11 @@ public:
     explicit ClassWidget(QWidget *parent = 0);
     ~ClassWidget();
     QWidget *widget;
-    void setCategory(const int& cate);//设置分类标志
-    void setTopName();//设置分类项的名字
-    void setElementName();//设置软件的名字
-    void initElement();//初始化软件对象
+    void setCategory(int cate);//设置分类标志
+    void setTopName(const CATEGORYMAP &cateMap);//设置分类项的名字
+    void setElementName(const CLASSSTRUCTMAP &classStructMap);//设置软件的名字
+    void initElement(const ELEMENTNUMBERMAP &classElementNumMap);//初始化软件对象
+    void setElementImage(const CLASSSTRUCTMAP &classStructMap);
 
 private:
     //每一个软件项`
@@ -40,9 +46,8 @@ private:
     int category;
     //空白widget
     QWidget *spaceWidget;
+    int spaceWidgetNum;
 
-    int index;
-    QLayoutItem *child;
 protected:
     //重写的窗口变化事件
     bool eventFilter(QObject *target, QEvent *event);

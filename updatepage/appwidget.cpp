@@ -5,7 +5,7 @@
 
 //#define SIZE_W 250
 
-AppWidget::AppWidget(QWidget *parent) : QWidget(parent)
+AppWidget::AppWidget(QWidget *parent,QString namestr) : QWidget(parent)
 {
     appLayout = new QHBoxLayout();
     appLayout->setMargin(0);
@@ -14,16 +14,16 @@ AppWidget::AppWidget(QWidget *parent) : QWidget(parent)
     bottomLayout = new QHBoxLayout();
 
     headButton = new QPushButton();
-    QPixmap pixmap(tr("updatepage/image/head.png"));
+    QPixmap pixmap("updatepage/image/head.png");
     headButton->setFlat(true);
     headButton->setIcon(pixmap);
     headButton->setIconSize(QSize(64,64));
 
     nameButton = new QPushButton();
     nameButton->setFlat(true);
-    nameButton->setMaximumWidth(100);
+    nameButton->setMaximumWidth(180);
     nameButton->setStyleSheet("text-align: left;");
-    nameButton->setText("QQ");
+    nameButton->setText(namestr);
 
     introstr = "全新视觉，简约界面乐享沟通！全新视觉，简约界面乐享沟通！全新视觉，简约界面乐享沟通！全新视觉，简约界面乐享沟通！";
 

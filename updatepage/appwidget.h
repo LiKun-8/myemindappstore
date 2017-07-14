@@ -11,7 +11,7 @@ class AppWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit AppWidget(QWidget *parent = 0);
+    explicit AppWidget(QWidget *parent ,QString namestr);
     bool event(QEvent *event);
 signals:
     void sigIntroResize();

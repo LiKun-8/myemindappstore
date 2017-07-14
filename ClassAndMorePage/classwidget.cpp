@@ -1,13 +1,6 @@
 #include "classwidget.h"
-#include <QVector>
-#include <QDebug>
-#include <QSpacerItem>
-#include <QEvent>
-//#include "jsonfunc.h"
 
-extern QMap<int,QString> cateMap;
-//extern QMap<int,SORTSTRUCT>  sortStrMap;
-extern QMap<int,int> sortElementNum;
+#define SPACEWIDGET 5
 
 ClassWidget::ClassWidget(QWidget *parent) :
     QWidget(parent)
@@ -29,7 +22,7 @@ ClassWidget::ClassWidget(QWidget *parent) :
 
     connect(classtop,SIGNAL(showAll(int)),this,SLOT(sendMoreShow(int)));
 
-    spaceWidget = new QWidget[5];
+    spaceWidget = new QWidget[SPACEWIDGET];
     for(int i =0 ;i<5;i++)
     {
         spaceWidget[i].setFixedSize(144,74);
@@ -40,7 +33,7 @@ ClassWidget::~ClassWidget()
 {
 }
 //设置分类标志
-void ClassWidget::setCategory(const int &cate)
+void ClassWidget::setCategory(int cate)
 {
     //    tt->setcategory(cate);
     classtop->setcategory(cate);
@@ -95,7 +88,7 @@ bool ClassWidget::eventFilter(QObject *target, QEvent *event)
                 //                }
 
                 //空Widget每次都要清空
-                for(int i = 0;i < column;i++)
+                for(int i = 0;i < SPACEWIDGET;i++)
                 {
                     gridLayout->removeWidget(&spaceWidget[i]);
                 }
@@ -124,6 +117,7 @@ bool ClassWidget::eventFilter(QObject *target, QEvent *event)
             //为不够一行的软件类添加空控件，使布局好看
             for(int i = 0;i<(column - demoElement.size());i++)
             {
+//                qDebug()<<(column - demoElement.size())<<endl;
                 gridLayout->addWidget(&spaceWidget[i],0,demoElement.size()+i,1,1,Qt::AlignLeft);
             }
 
@@ -133,12 +127,10 @@ bool ClassWidget::eventFilter(QObject *target, QEvent *event)
 
                 for(int i = (row*column);i<demoElement.size();i++)
                 {
-
                     demoElement.at(i)->hide();
                 }
                 for(int i = 0;i<(row*column);i++)
                 {
-
                     demoElement.at(i)->show();
                 }
             }
@@ -155,51 +147,71 @@ void ClassWidget::sendMoreShow(int i)
 }
 
 //设置分类项名字
-void ClassWidget::setTopName()
+void ClassWidget::setTopName(const CATEGORYMAP &cateMap)
 {
-//    if(cateMap.isEmpty())
-//    {
-//        qDebug()<<"the cateMap is empty!"<<endl;
-//    }
+    if(cateMap.isEmpty())
+    {
+        qDebug()<<"the cateMap is empty!"<<endl;
+    }
 
-//    if(cateMap.contains(category+1))
-//    {
-//        QMap<int,QString>::iterator it = cateMap.find(category+1);
-//        classtop->setLabelData(it.value());
-//        //        qDebug()<<"the it.value is : "<<it.value()<<endl;
-//    }
+    if(cateMap.contains(category+1))
+    {
+        QMap<int,QString>::const_iterator it = cateMap.find(category+1);
+        classtop->setLabelData(it.value());
+        //        qDebug()<<"the it.value is : "<<it.value()<<endl;
+    }
 }
 
 //设置软件项名字
-void ClassWidget::setElementName()
+void ClassWidget::setElementName(const CLASSSTRUCTMAP &classStructMap)
 {
-//    if(sortStrMap.isEmpty())
-//    {
-//        qDebug()<<"the sortstr is empty!"<<endl;
-//    }
+    if(classStructMap.isEmpty())
+    {
+        qDebug()<<"the sortstr is empty!"<<endl;
+    }
 
-//    QMap<int,SORTSTRUCT>::iterator item = sortStrMap.begin();
-//    for(int i = 0;item != sortStrMap.end() && i<18 ; ++item)
-//    {
-//        //        qDebug()<<"the sortstr is empty!"<<item.value().btnname<<endl;
-//        if(item.value().category == (category+1))
-//        {
-//            tt[i].setBtnName(item.value().btnname);
-//            i++;
-//        }
-//    }
+    QMap<int,CLASSSTRUCT>::const_iterator item = classStructMap.begin();
+    for(int i = 0;item != classStructMap.end() && i<18 ; ++item)
+    {
+        if(item.value().category == (category+1))
+        {
+            tt[i].setBtnName(item.value().proName);
+            tt[i].setProductId(item.key());
+            i++;
+        }
+    }
 }
 
 //初始化软件项
-void ClassWidget::initElement()
+void ClassWidget::initElement(const ELEMENTNUMBERMAP &classElementNumMap)
 {
-//    QMap<int,int>::iterator it = sortElementNum.find(category+1);
-//    tt = new Element[it.value()];
-    tt = new Element[15];
-//    for(int i=0 ; i<it.value() && i<18 ; i++)
-    for(int i=0 ; i<15 ; i++)
+//    qDebug()<<__FUNCTION__<<endl;
+    QMap<int,int>::const_iterator it;
+
+    it = classElementNumMap.find(category+1);
+    tt = new Element[it.value()];
+
+    for(int i=0 ; i<it.value() && i<18 ; i++)
     {
         demoElement.append(tt[i].baseWidget);
+    }
+}
+
+void ClassWidget::setElementImage(const CLASSSTRUCTMAP &classStructMap)
+{
+    if(classStructMap.isEmpty())
+    {
+        qDebug()<<"the sortstr is empty!"<<endl;
+    }
+
+    QMap<int,CLASSSTRUCT>::const_iterator item = classStructMap.begin();
+    for(int i = 0;item != classStructMap.end() && i<18 ; ++item)
+    {
+        if(item.value().category == (category+1))
+        {
+            tt[i].setBtnImage(item.value().proImage);
+            i++;
+        }
     }
 }
 
