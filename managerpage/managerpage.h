@@ -5,6 +5,7 @@
 #include <QEvent>
 #include "updatepage/taskbar.h"
 #include "managerpage/managerwidget.h"
+#include "../updatepage/pkupdates.h"
 
 class ManagerPage : public QWidget
 {
@@ -25,10 +26,12 @@ private:
     QLabel *splitLabel;
     ManagerWidget *compManager;
     QScrollArea *manScroArea;
+    PkUpdates *updm;
 
 signals:
 
 public slots:
+    void onGetInsFinished(QVariantMap insdMap);
 };
 
 #endif // MANAGERPAGE_H

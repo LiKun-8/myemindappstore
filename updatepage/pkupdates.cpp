@@ -9,7 +9,7 @@ PkUpdates::PkUpdates(QObject *parent) :
 {    
     shareData = new ShareData();
     jsonFunc = new JSONFUNC(shareData);
-
+    sigFlag = 1;
     connect(PackageKit::Daemon::global(), &PackageKit::Daemon::updatesChanged, this, &PkUpdates::onUpdatesChanged,Qt::QueuedConnection);
     //    connect(PackageKit::Daemon::global(), &PackageKit::Daemon::networkStateChanged, this, &PkUpdates::networkStateChanged);
 }
@@ -21,6 +21,23 @@ void PkUpdates::checkUpdates(bool force)
 
     connect(m_cacheTrans.data(), &PackageKit::Transaction::finished, this, &PkUpdates::onFinished);
 }
+
+
+void PkUpdates::onUpdatesChanged()
+{
+//    qDebug() << __FUNCTION__ << ": Updates changed, getting updates!";
+    if(sigFlag != 2)
+    {
+        getUpdates();
+        getPackages();
+    }
+    sigFlag++;
+    if(sigFlag > 10)
+    {
+        sigFlag = 3;
+    }
+}
+
 
 void PkUpdates::getUpdates()
 {
@@ -57,16 +74,6 @@ int PkUpdates::insCount() const
     return m_packagesList.count();
 }
 
-void PkUpdates::onUpdatesChanged()
-{
-    qDebug() << __FUNCTION__ << ": Updates changed, getting updates!";
-
-    getUpdates();
-    jsonFunc->setAppname();
-
-//    getPackages();
-}
-
 QVariantMap PkUpdates::packages() const
 {
     return m_updateList;
@@ -81,7 +88,7 @@ QStringList PkUpdates::getPacName() const
 void PkUpdates::onPackage(PackageKit::Transaction::Info info, const QString &packageID, const QString &summary)
 {
     QString packageName = PackageKit::Transaction::packageName(packageID);
-//    qDebug() << __FUNCTION__ << ": Got update package:" << packageName;
+//    qDebug() << __FUNCTION__ << ": Got update package:" << packageID;
 
     switch (info) {
     case PackageKit::Transaction::InfoBlocked:
@@ -98,10 +105,9 @@ void PkUpdates::onGetPackages(PackageKit::Transaction::Info info, const QString 
     switch (info) {
     case PackageKit::Transaction::InfoInstalled:
     {
-        QString packageName = PackageKit::Transaction::packageName(packageID);
-//        qDebug() << __FUNCTION__ << ": Got packages:" << packageID;
+        QString packageName = PackageKit::Transaction::packageData(packageID);
+//        qDebug() << __FUNCTION__ << ": Got packages:" << packageName;
         m_packagesList.insert(packageID, summary);
-
     }
         break;
     default:
@@ -113,7 +119,7 @@ void PkUpdates::onGetPackages(PackageKit::Transaction::Info info, const QString 
 
 void PkUpdates::onFinished(PackageKit::Transaction::Exit status, uint runtime)
 {
-    qDebug() << __FUNCTION__ ;
+//    qDebug() << __FUNCTION__ ;
     PackageKit::Transaction * trans = qobject_cast<PackageKit::Transaction *>(sender());
     if (!trans)
         return;
@@ -136,12 +142,12 @@ void PkUpdates::onFinished(PackageKit::Transaction::Exit status, uint runtime)
     {
         if (status == PackageKit::Transaction::ExitSuccess)
         {
+
             connect(jsonFunc,SIGNAL(productIsOk()),this,SLOT(getUpRelease()));
 
 //            emit getUpdFinished(m_upNameList);
-//            m_upNameList.clear();
-            qDebug() << "Check updates transaction finished successfully";
-            qDebug() << "Total number of updates: " << count() << endl;
+//            qDebug() << "Check updates transaction finished successfully";
+//            qDebug() << "Total number of updates: " << count() << endl;
         }
         else
         {
@@ -152,6 +158,8 @@ void PkUpdates::onFinished(PackageKit::Transaction::Exit status, uint runtime)
     {
         if (status == PackageKit::Transaction::ExitSuccess)
         {
+            connect(jsonFunc,SIGNAL(productIsOk()),this,SLOT(getInstalled()));
+            jsonFunc->setAppname();
             qDebug() << "Get Packages Installed transaction finished successfully";
             qDebug() << "Total number of Packages Installed: " << insCount() << endl;
         }
@@ -162,32 +170,68 @@ void PkUpdates::onFinished(PackageKit::Transaction::Exit status, uint runtime)
     }
 }
 
+
 void PkUpdates::getUpRelease()
 {
-
+    qDebug()<< __FUNCTION__;
     int releaseAry[m_upNameList.count()];
     int num = 0;
-    qDebug()<< shareData->classStrMap.count();
-    QMap<int,CLASSSTRUCT>::iterator item = shareData->classStrMap.begin();
-    for(; item != shareData->classStrMap.end(); ++item)
-    {
-        qDebug()<<item.value().proName;
-    }
+    qDebug()<< "m_upNameList.count() :" << m_upNameList.count();
+    qDebug()<< "shareData->classStrMap.count() :" << shareData->classStrMap.count();
+    QMap<int,CLASSSTRUCT>::iterator item;
     for(int i = 0; i < m_upNameList.count(); i++)
-        for(; item != shareData->classStrMap.end(); ++item)
+    {
+        for(item = shareData->classStrMap.begin(); item != shareData->classStrMap.end(); item++)
         {
-            qDebug()<<item.value().proName;
+//            qDebug()<< "m_upNameList.at(" << i << ") :" << m_upNameList.at(i);
+//            qDebug()<< "item.value().proName :" << item.value().proName << endl;
+
             if(m_upNameList.at(i) == item.value().proName)
             {
-                qDebug() << "m_upNameList.at(i) : " << m_upNameList.at(i);
                 releaseAry[num] = item.value().releaseId;
                 num++;
             }
         }
+    }
+
+//    qDebug()<< "m_upNameList.count() :" << m_upNameList.count();
+//    qDebug()<< "for over:  num == " << num;
+
     if(num != 0)
     {
         jsonFunc->getUpdateRelease(releaseAry,num);
+        connect(jsonFunc,SIGNAL(updateIsOk()),this,SLOT(sendUpdateData()));
     }
 }
 
+void PkUpdates::getInstalled()
+{
+//    qDebug() << __FUNCTION__;
+    QVariantMap installedMap;
+
+    QMap<int,CLASSSTRUCT>::iterator item1;
+    QVariantMap::iterator iter;
+
+    for(iter = m_packagesList.begin(); iter != m_packagesList.end(); iter++)
+    {
+        for(item1 = shareData->classStrMap.begin(); item1 != shareData->classStrMap.end(); item1++)
+        {
+            QString packName = PackageKit::Daemon::packageName(iter.key());
+
+            if(packName == item1.value().proName)
+            {
+                //                installedMap.insert(item1.key(),CLASSSTRUCT(item1.value().category,item1.value().releaseId,item1.value().proImage,item1.value().proName,0,item1.value().proDescription));
+                installedMap.insert(iter.key(),item1.value().proImage);
+            }
+        }
+    }
+
+    emit getInsFinished(installedMap);
+
+}
+
+void PkUpdates::sendUpdateData()
+{
+    emit sigUpdateData(shareData->updateStrMap);
+}
 

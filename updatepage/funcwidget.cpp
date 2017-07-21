@@ -1,7 +1,7 @@
 #include "funcwidget.h"
 #include <QDebug>
 
-FuncWidget::FuncWidget(QWidget *parent) : QWidget(parent)
+FuncWidget::FuncWidget(QWidget *parent, QString funcStr) : QWidget(parent),funcText(funcStr)
 {
     funcLayout = new QHBoxLayout;
 
@@ -13,12 +13,13 @@ FuncWidget::FuncWidget(QWidget *parent) : QWidget(parent)
     hideButton = new QPushButton();
 
     funcLabel->setText(tr(" 新版特性"));
-    nfuncEdit->setText("- 全新皮肤引擎，全新视觉盛宴; \n- QQ大视频，视频聊天更大更清晰; \n- 聊天窗口个性动作，互动方式更多样; \n- QQ聊天装扮，聊天窗口与众不同;　\n- 空间编辑器新增记事本，双击头像直接开启;　\n- 自定义好友上线提醒，实时关注亲密好友;　\n- QQ锁独立密码，隐私保护更方便安全;　\n- 更换头像界面优化，自定义头像更换更便捷;");
+//    nfuncEdit->setText("- 全新皮肤引擎，全新视觉盛宴; \n- QQ大视频，视频聊天更大更清晰; \n- 聊天窗口个性动作，互动方式更多样; \n- QQ聊天装扮，聊天窗口与众不同;　\n- 空间编辑器新增记事本，双击头像直接开启;　\n- 自定义好友上线提醒，实时关注亲密好友;　\n- QQ锁独立密码，隐私保护更方便安全;　\n- 更换头像界面优化，自定义头像更换更便捷;");
+    nfuncEdit->setText(funcStr);
     nfuncEdit->setStyleSheet("border: 0;" "background:white");
     nfuncEdit->setReadOnly(true);
     nfuncEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    QPixmap pixmap(tr("updatepage/image/hide.png"));
+    QPixmap pixmap(tr(":/image/hide.png"));
     hideButton->setFlat(true);
     hideButton->setIcon(pixmap);
     hideButton->setIconSize(QSize(44,44));

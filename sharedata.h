@@ -21,12 +21,12 @@ struct UPDATESTRUCT{
 //    int releaseId;
     QString version;
     QString btnImage;
-//    QString btnName;
+    QString btnName;
     QString changeLog;
     QString downloadUrl;
-    double packageSize;
-    UPDATESTRUCT(int id,QString ver,const QString &image,const QString & changelog,const QString & downloadurl,double packagesize):
-        productId(id),version(ver),btnImage(image),changeLog(changelog),downloadUrl(downloadurl),packageSize(packagesize){}
+    int packageSize;
+    UPDATESTRUCT(int id,QString ver,const QString &image,const QString &name,const QString & changelog,const QString & downloadurl,int packagesize):
+        productId(id),version(ver),btnImage(image),changeLog(changelog),downloadUrl(downloadurl),btnName(name),packageSize(packagesize){}
 };
 
 //产品截图结构体

@@ -21,7 +21,7 @@ void UpdatePage::createUpdateWindow()
     pageUpdateWidget = new QWidget();
 
     updateTable = new QTableWidget(this);
-//    updateTable->setBaseSize(960,640);
+    //    updateTable->setBaseSize(960,640);
     updateTable->setShowGrid(false);
     updateTable->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     updateTable->setFrameShape(QFrame::NoFrame);
@@ -29,7 +29,7 @@ void UpdatePage::createUpdateWindow()
     updateTable->setFocusPolicy(Qt::NoFocus);
 
     updTaskBar = new TaskBar(this,"0个应用可升级","全部更新");
-    connect(upd,SIGNAL(getUpdFinished(QStringList)),this,SLOT(onGetupFinished(QStringList)));
+    connect(upd,SIGNAL(sigUpdateData(UPDATESTRUCTMAP)),this,SLOT(onGetupFinished(UPDATESTRUCTMAP)));
 
     upVLayout = new QVBoxLayout();
     upVLayout->setMargin(16);
@@ -42,18 +42,17 @@ void UpdatePage::createUpdateWindow()
     upScroArea->setWidgetResizable(true);
 }
 
-void UpdatePage::onGetupFinished(QStringList nameList)
+void UpdatePage::onGetupFinished(UPDATESTRUCTMAP updateMap)
 {
-    qDebug() << endl << __FUNCTION__ ;
-    int rowCount = nameList.length();
-    qDebug() << "rowCount:" << rowCount ;
+//    qDebug() << endl << __FUNCTION__ ;
+    int rowCount = updateMap.count();
     QString countStr = QString::number(rowCount, 10);
     QString upStr = countStr + "个应用可升级" ;
     updTaskBar->setTaskLabel(upStr);
     updateTable->setColumnCount(1);
     updateTable->setRowCount(rowCount);
 
-//    updateTable->resizeColumnToContents(0);
+    //    updateTable->resizeColumnToContents(0);
     updateTable->setStyleSheet(
                 "QTableWidget {"
                 "background-color: #00000000;"
@@ -76,12 +75,20 @@ void UpdatePage::onGetupFinished(QStringList nameList)
     QHeaderView *hheaderView = updateTable->horizontalHeader();
     hheaderView->setHidden(true);
 
-    for(int i = 0; i < rowCount; i++)
+    QMap<int,UPDATESTRUCT>::iterator itor;
+    int count = 0;
+    for(itor = updateMap.begin(); itor != updateMap.end(); itor++)
     {
-        QString appName =  nameList.at(i);
-//        qDebug() << "appName : " << appName;
-        AppWidget* appWidget = new AppWidget(this,appName);
-        updateTable->setCellWidget(i,0,appWidget);
+        QString headUrl = itor.value().btnImage;
+        QString appName = itor.value().btnName;
+        QString changeLog = itor.value().changeLog;
+        int psize = itor.value().packageSize;
+        QString packSize = transPackSize(psize);
+        QString packVersion = itor.value().version;
+
+        AppWidget* appWidget = new AppWidget(this,headUrl,appName,packSize,packVersion,changeLog);
+        updateTable->setCellWidget(count,0,appWidget);
+        count++;
 
         connect(appWidget->headButton,SIGNAL(clicked()),this,SLOT(pageUpdateBtnClicked()));
         connect(appWidget->nameButton,SIGNAL(clicked()),this,SLOT(pageUpdateBtnClicked()));
@@ -114,7 +121,8 @@ void UpdatePage::pageUpdateBtnClicked()
             int tableHeight = updateTable->height();
 
             updateTable->insertRow(i+1);
-            FuncWidget *nfuncWidget = new FuncWidget();
+            QString funcStr = appWidget->changeLog.split("#").at(1);
+            FuncWidget *nfuncWidget = new FuncWidget(this,funcStr);
             updateTable->setCellWidget(i+1,0,nfuncWidget);
             int textHeight  = nfuncWidget->nfuncEdit->document()->size().height();
             int rowHeight = textHeight+20+16+18+22;
@@ -170,7 +178,7 @@ void UpdatePage::strLenChanged()
             }
             if(fontSize > labelWidth)
             {
-                fmstr = fm.elidedText(chLabelWidth->introstr, Qt::ElideRight, labelWidth - 70);
+                fmstr = fm.elidedText(chLabelWidth->introstr, Qt::ElideRight, labelWidth-100);
             }
             chLabelWidth->introLabel->setText(fmstr);
         }
@@ -185,9 +193,40 @@ void UpdatePage::textAreaChanged(int hig)
         if(sender() == chEditHeight)
         {
             int rowHeight = hig+20+16+18+22;
-            updateTable->setRowHeight(i,rowHeight);
+            updateTable->setRowHeight(i,rowHeight+5);
         }
     }
+}
+
+QString UpdatePage::transPackSize(int psize)
+{
+    QString packSize;
+    if(psize >= 1024)
+    {
+        float psizek = psize/1024;
+        if(psizek >= 1024)
+        {
+            float psizem = psizek/1024;
+            if(psizek >= 1024)
+            {
+                float psizeg = psizem/1024;
+                packSize = QString::number(psizeg,10,1) + "G";
+            }
+            else
+            {
+                packSize = QString::number(psizem,10,1) + "M";
+            }
+        }
+        else
+        {
+            packSize = QString::number(psizek,10,1) + "K";
+        }
+    }
+    else
+    {
+        packSize = QString::number(psize,10,1) + "B";
+    }
+    return packSize;
 }
 
 bool UpdatePage::event(QEvent *event)

@@ -1,6 +1,8 @@
  #include "managerwidget.h"
+#include <QNetworkRequest>
+#include <QNetworkReply>
 
-ManagerWidget::ManagerWidget(QWidget *parent,QString namestr, QString verstr, QString sizestr) : QWidget(parent)
+ManagerWidget::ManagerWidget(QWidget *parent,QString urlstr,QString namestr, QString verstr, QString sizestr) : QWidget(parent)
 {    
     hbLayout = new QHBoxLayout();
     hbLayout->setMargin(0);
@@ -8,12 +10,8 @@ ManagerWidget::ManagerWidget(QWidget *parent,QString namestr, QString verstr, QS
     vbLayout->setMargin(0);
 
     headButton = new QPushButton();
-    headButton = new QPushButton();
-    QPixmap pixmap(tr("updatepage/image/head.png"));
     headButton->setFlat(true);
-    headButton->setIcon(pixmap);
-    headButton->setIconSize(QSize(64,64));
-
+    getImage(urlstr);
 
     nameButton = new QPushButton();
     nameButton->setFlat(true);
@@ -69,3 +67,26 @@ void ManagerWidget::setManagerButton(QString manastr)
 {
     managerButton->setText(manastr);
 }
+
+void ManagerWidget::getImage(QString headUrl)
+{
+    imageManager = new QNetworkAccessManager();
+    QNetworkRequest request;
+    request.setUrl(QUrl(headUrl));
+    connect(imageManager, SIGNAL(finished(QNetworkReply *)), this, SLOT(replyFinished(QNetworkReply *)));
+    imageManager->get(request);
+}
+
+void ManagerWidget::replyFinished(QNetworkReply *reply)
+{
+    if (reply->error() == QNetworkReply::NoError)
+    {
+        QByteArray bytes = reply->readAll();
+        QPixmap pixmap;
+        pixmap.loadFromData(bytes);
+        headButton->setIcon(pixmap);
+        headButton->setIconSize(QSize(64,64));
+
+    }
+}
+

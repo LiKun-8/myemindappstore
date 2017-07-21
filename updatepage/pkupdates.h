@@ -9,7 +9,7 @@
 #include "../jsonfunc.h"
 #include "../sharedata.h"
 
-#define MAXUPNUM 100
+//#define MAXUPNUM 100
 
 class PkUpdates : public QObject
 {
@@ -26,7 +26,9 @@ public:
 signals:
     void updatesChanged();
     void getUpdFinished(QStringList);
+    void getInsFinished(QVariantMap);
     void upReleaseAry(int *,int);
+    void sigUpdateData(UPDATESTRUCTMAP);
 public slots:
     Q_INVOKABLE void checkUpdates(bool force = true);
 
@@ -37,6 +39,8 @@ private slots:
     void onPackage(PackageKit::Transaction::Info info, const QString &packageID, const QString &summary);
     void onGetPackages(PackageKit::Transaction::Info info, const QString &packageID, const QString &summary);
     void getUpRelease();
+    void getInstalled();
+    void sendUpdateData();
 private:
     void onChanged();
     void onUpdatesChanged();
@@ -49,7 +53,8 @@ private:
     QVariantMap m_updateList;
     QVariantMap m_packagesList;
     QStringList m_upNameList;
-    int releseAry[MAXUPNUM];
+    int sigFlag;
+//    int releseAry[MAXUPNUM];
 
 };
 

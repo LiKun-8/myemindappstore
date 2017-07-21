@@ -6,15 +6,20 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QNetworkAccessManager>
 
 class AppWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit AppWidget(QWidget *parent ,QString namestr);
+    explicit AppWidget(QWidget *parent ,QString headUrl,QString nameStr,QString sizeStr,QString verStr,QString logStr);
     bool event(QEvent *event);
+    void getImage(QString headUrl);
 signals:
     void sigIntroResize();
+
+private slots:
+    void getImageFinished(QNetworkReply *reply);
 
 public:
     QHBoxLayout *appLayout;
@@ -29,7 +34,8 @@ public:
     QLabel *versionLabel;
     QPushButton *updateButton;
     QPixmap pix;
-
+    QString changeLog;
+    QNetworkAccessManager *imageUpdate;
 
 };
 

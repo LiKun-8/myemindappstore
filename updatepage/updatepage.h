@@ -20,6 +20,7 @@ public:
     explicit UpdatePage(QWidget *parent = 0);
     void createUpdateWindow();
     void getUpdates();
+    QString transPackSize(int psize);
 
 private:
     QWidget *pageUpdateWidget;
@@ -29,7 +30,7 @@ private:
     QScrollArea *upScroArea;
     bool event(QEvent *event);
     PkUpdates * upd;
-    QMutex mutex;
+//    QMutex mutex;
 
 
     int test;
@@ -40,7 +41,7 @@ public slots:
     void pageUpdateBtnClicked();
     void strLenChanged();
     void textAreaChanged(int hig);
-    void onGetupFinished(QStringList nameList);
+    void onGetupFinished(UPDATESTRUCTMAP updateMap);
 };
 
 #endif // UPDATEPAGE_H

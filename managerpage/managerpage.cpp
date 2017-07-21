@@ -3,6 +3,8 @@
 
 ManagerPage::ManagerPage(QWidget *parent) : QWidget(parent)
 {
+    updm = new PkUpdates(this);
+
     CreateManagerWindow();
 }
 
@@ -48,12 +50,14 @@ void ManagerPage::CreateManagerWindow()
     QHeaderView *hheaderView = installTable->horizontalHeader();
     hheaderView->setHidden(true);
 
+    connect(updm,SIGNAL(getInsFinished(QVariantMap)),this,SLOT(onGetInsFinished(QVariantMap)));
+
     int rowCount = installTable->rowCount();
     installTable->setMinimumHeight(96*rowCount);
 
     for(int i = 0; i < rowCount; i++)
     {
-        ManagerWidget *manTaskManager = new ManagerWidget(this,"QQ","版本:0.8.3","大小:25.8M");
+        ManagerWidget *manTaskManager = new ManagerWidget(this,"","QQ","版本:0.8.3","大小:25.8M");
         manTaskManager->GetButton(1)->hide();
         installTable->setCellWidget(i,0,manTaskManager);
     }
@@ -69,42 +73,7 @@ void ManagerPage::CreateManagerWindow()
     manCompBar->size().setHeight(64);
 
     compTable = new QTableWidget();
-    compTable = new QTableWidget();
-    compTable->setColumnCount(1);
-    compTable->setRowCount(10);
-    compTable->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    compTable->setFrameShape(QFrame::NoFrame);
-    compTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    compTable->setFocusPolicy(Qt::NoFocus);
-    compTable->resizeColumnToContents (0);
-    compTable->setShowGrid(false);
-    compTable->setStyleSheet(
-                "QTableWidget {"
-                "background-color: #00000000;"
-                "}"
-                "QTableWidget::item {"
-                "border-top: 1px solid #dcdcdc;"
-                "}"
-                "QTableWidget::item:selected{"
-                "background:white;"
-                "}"
-                );
-    compTable->verticalHeader()->setDefaultSectionSize(96);
-    compTable->horizontalHeader()->setStretchLastSection(true);
-    QHeaderView* vheaderView1 = compTable->verticalHeader();
-    vheaderView1->setHidden(true);
-    QHeaderView *hheaderView1 = compTable->horizontalHeader();
-    hheaderView1->setHidden(true);
 
-    int compRowCount = compTable->rowCount();
-    compTable->setMinimumHeight(96*compRowCount);
-
-    for(int j = 0; j < compRowCount; j++)
-    {
-        ManagerWidget *manTaskManager = new ManagerWidget(this,"微信","版本:0.2.6","大小:66.8M");
-        manTaskManager->GetButton(2)->setText(tr("Open"));
-        compTable->setCellWidget(j,0,manTaskManager);
-    }
 
     vboxLayout = new QVBoxLayout();
     vboxLayout->setMargin(0);
@@ -131,6 +100,58 @@ void ManagerPage::CreateManagerWindow()
 
 }
 
+void ManagerPage::onGetInsFinished(QVariantMap insdMap)
+{
+    qDebug() << __FUNCTION__;
+
+    int insRowCount = insdMap.count();
+
+    compTable->setColumnCount(1);
+    compTable->setRowCount(insRowCount);
+//    compTable->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    compTable->setFrameShape(QFrame::NoFrame);
+    compTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    compTable->setFocusPolicy(Qt::NoFocus);
+    compTable->resizeColumnToContents (0);
+    compTable->setShowGrid(false);
+    compTable->setStyleSheet(
+                "QTableWidget {"
+                "background-color: #00000000;"
+                "}"
+                "QTableWidget::item {"
+                "border-top: 1px solid #dcdcdc;"
+                "}"
+                "QTableWidget::item:selected{"
+                "background:white;"
+                "}"
+                );
+    compTable->verticalHeader()->setDefaultSectionSize(96);
+    compTable->horizontalHeader()->setStretchLastSection(true);
+    QHeaderView* vheaderView1 = compTable->verticalHeader();
+    vheaderView1->setHidden(true);
+    QHeaderView *hheaderView1 = compTable->horizontalHeader();
+    hheaderView1->setHidden(true);
+
+    compTable->setMinimumHeight(96*insRowCount);
+
+    QVariantMap::iterator item;
+    int count = 0;
+    for(item = insdMap.begin(); item != insdMap.end(); item++)
+    {
+//        qDebug() << "item.value().proName" << ;
+        QString appName = PackageKit::Transaction::packageName(item.key());
+        QString appVersion = "版本 : " + PackageKit::Transaction::packageVersion(item.key());
+        QString headUrl = item.value().toString();
+
+//        QString appVersion = item.value().
+        ManagerWidget *manTaskManager = new ManagerWidget(this,headUrl,appName,appVersion,"大小 : 66.8M");
+        manTaskManager->GetButton(2)->setText(tr("Open"));
+        compTable->setCellWidget(count,0,manTaskManager);
+        count ++;
+    }
+}
+
+
 bool ManagerPage::event(QEvent *event)
 {
     if(event->type() == QEvent::Resize)
@@ -139,5 +160,7 @@ bool ManagerPage::event(QEvent *event)
         return true;
     }
     return QWidget::event(event);
+
 }
+
 

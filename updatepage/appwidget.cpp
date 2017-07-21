@@ -2,10 +2,12 @@
 #include <QDebug>
 #include <QPalette>
 #include <QEvent>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 
 //#define SIZE_W 250
 
-AppWidget::AppWidget(QWidget *parent,QString namestr) : QWidget(parent)
+AppWidget::AppWidget(QWidget *parent, QString headUrl, QString nameStr, QString sizeStr, QString verStr, QString logStr) : QWidget(parent),changeLog(logStr)
 {
     appLayout = new QHBoxLayout();
     appLayout->setMargin(0);
@@ -14,21 +16,18 @@ AppWidget::AppWidget(QWidget *parent,QString namestr) : QWidget(parent)
     bottomLayout = new QHBoxLayout();
 
     headButton = new QPushButton();
-    QPixmap pixmap("updatepage/image/head.png");
     headButton->setFlat(true);
-    headButton->setIcon(pixmap);
-    headButton->setIconSize(QSize(64,64));
+    getImage(headUrl);
 
     nameButton = new QPushButton();
     nameButton->setFlat(true);
     nameButton->setMaximumWidth(180);
     nameButton->setStyleSheet("text-align: left;");
-    nameButton->setText(namestr);
+    nameButton->setText(nameStr);
 
-    introstr = "全新视觉，简约界面乐享沟通！全新视觉，简约界面乐享沟通！全新视觉，简约界面乐享沟通！全新视觉，简约界面乐享沟通！";
-
+    QStringList logList = logStr.split("#");
+    introstr = logList.at(0);
     introLabel = new QLabel();
-    introLabel->size().setWidth(20);
 
     introLabel->setStyleSheet("border-right: 1px; border-style: solid; border-color: #cccccc;");
     introLabel->setText(introstr);
@@ -45,10 +44,10 @@ AppWidget::AppWidget(QWidget *parent,QString namestr) : QWidget(parent)
 
     sizeLabel = new QLabel();
     sizeLabel->resize(16,64);
-    sizeLabel->setText(tr("13.8M"));
+    sizeLabel->setText(sizeStr);
 
     versionLabel = new QLabel();
-    versionLabel->setText(tr("V7.0.0"));
+    versionLabel->setText(verStr);
 
     updateButton = new QPushButton();
     updateButton->setFixedSize(80,32);
@@ -76,6 +75,28 @@ AppWidget::AppWidget(QWidget *parent,QString namestr) : QWidget(parent)
     appLayout->addSpacing(112);
     appLayout->addWidget(updateButton);
     setLayout(appLayout);
+}
+
+void AppWidget::getImage(QString headUrl)
+{
+    imageUpdate = new QNetworkAccessManager();
+    QNetworkRequest request;
+    request.setUrl(QUrl(headUrl));
+    connect(imageUpdate, SIGNAL(finished(QNetworkReply *)), this, SLOT(getImageFinished(QNetworkReply *)));
+    imageUpdate->get(request);
+}
+
+void AppWidget::getImageFinished(QNetworkReply *reply)
+{
+    if (reply->error() == QNetworkReply::NoError)
+    {
+        QByteArray bytes = reply->readAll();
+        QPixmap pixmap;
+        pixmap.loadFromData(bytes);
+        headButton->setIcon(pixmap);
+        headButton->setIconSize(QSize(64,64));
+
+    }
 }
 
 bool AppWidget::event(QEvent *event)
