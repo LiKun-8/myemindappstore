@@ -86,14 +86,28 @@ void UpdatePage::onGetupFinished(UPDATESTRUCTMAP updateMap)
         QString packSize = transPackSize(psize);
         QString packVersion = itor.value().version;
 
-        AppWidget* appWidget = new AppWidget(this,headUrl,appName,packSize,packVersion,changeLog);
+        QVariantMap updateList = upd->packages();
+        QString pkgId;
+        QVariantMap::iterator iter;
+        for(iter = updateList.begin(); iter != updateList.end(); iter++)
+        {
+            QString packageName = PackageKit::Transaction::packageName(iter.key());
+            if(appName == packageName)
+            {
+                pkgId = iter.key();
+                qDebug() << "pkgId == " << pkgId;
+                break;
+            }
+        }
+
+        AppWidget* appWidget = new AppWidget(this,headUrl,appName,packSize,packVersion,changeLog,pkgId);
         updateTable->setCellWidget(count,0,appWidget);
         count++;
 
-        connect(appWidget->headButton,SIGNAL(clicked()),this,SLOT(pageUpdateBtnClicked()));
-        connect(appWidget->nameButton,SIGNAL(clicked()),this,SLOT(pageUpdateBtnClicked()));
-        connect(appWidget->funcButton,SIGNAL(clicked()),this,SLOT(pageUpdateBtnClicked()));
-        connect(appWidget->updateButton,SIGNAL(clicked()),this,SLOT(pageUpdateBtnClicked()));
+        connect(appWidget->getHeadButton(),SIGNAL(clicked()),this,SLOT(pageUpdateBtnClicked()));
+        connect(appWidget->getNameButton(),SIGNAL(clicked()),this,SLOT(pageUpdateBtnClicked()));
+        connect(appWidget->getFuncButton(),SIGNAL(clicked()),this,SLOT(pageUpdateBtnClicked()));
+        connect(appWidget->getUpdateButton(),SIGNAL(clicked()),this,SLOT(pageUpdateBtnClicked()));
         connect(appWidget,SIGNAL(sigIntroResize()),this,SLOT(strLenChanged()));
     }
     updateTable->setRowHeight(0,95);
@@ -106,51 +120,54 @@ void UpdatePage::pageUpdateBtnClicked()
     {
         AppWidget* appWidget = (AppWidget*)updateTable->cellWidget(i,0);
 
-        if(sender() == appWidget->headButton )
+        if(sender() == appWidget->getHeadButton() )
         {
             //            qDebug() << "btn == headButton:" << "row == " << i;
             break;
         }
-        else if(sender() == appWidget->nameButton)
+        else if(sender() == appWidget->getNameButton())
         {
             //            qDebug() << "btn == nameButton:" << "row == " << i;
             break;
         }
-        else if(sender() == appWidget->funcButton)
+        else if(sender() == appWidget->getFuncButton())
         {
             int tableHeight = updateTable->height();
 
             updateTable->insertRow(i+1);
-            QString funcStr = appWidget->changeLog.split("#").at(1);
+            QString funcStr = appWidget->getChangeLog().split("#").at(1);
             FuncWidget *nfuncWidget = new FuncWidget(this,funcStr);
             updateTable->setCellWidget(i+1,0,nfuncWidget);
-            int textHeight  = nfuncWidget->nfuncEdit->document()->size().height();
+            int textHeight  = nfuncWidget->getNfuncEdit()->document()->size().height();
             int rowHeight = textHeight+20+16+18+22;
             updateTable->setRowHeight(i+1,rowHeight);
-            appWidget->funcButton->setEnabled(false);
+            appWidget->getFuncButton()->setEnabled(false);
             updateTable->setMinimumHeight(tableHeight + rowHeight);
 
-            connect(nfuncWidget->hideButton,SIGNAL(clicked()),this,SLOT(pageUpdateBtnClicked()));
+            connect(nfuncWidget->getHideButton(),SIGNAL(clicked()),this,SLOT(pageUpdateBtnClicked()));
             connect(nfuncWidget,SIGNAL(sigTextHeight(int)),this,SLOT(textAreaChanged(int)));
 
             break;
         }
-        else if(sender() == appWidget->updateButton)
+        else if(sender() == appWidget->getUpdateButton())
         {
-            //            qDebug() << "btn == updateButton:" << "row == " << i;
+            qDebug() << "btn == updateButton:" << "row == " << i;
+            QString pkgId = appWidget->getPkgId();
+            qDebug() << "pkgId == " << pkgId;
+            upd->installUpdate(pkgId);
             break;
         }
         else
         {
             FuncWidget* gfuncWidget = (FuncWidget*)updateTable->cellWidget(i,0);
-            if(sender() == gfuncWidget->hideButton)
+            if(sender() == gfuncWidget->getHideButton())
             {
                 //                qDebug() << "btn == hideButton:" << "row == " << i;
                 int rmvTableHeight = updateTable->height();
                 int rmvRowHeight = updateTable->rowHeight(i);
                 int tableHeight = rmvTableHeight - rmvRowHeight;
                 AppWidget *eblBtnWid = (AppWidget *)updateTable->cellWidget(i-1,0);
-                eblBtnWid->funcButton->setEnabled(true);
+                eblBtnWid->getFuncButton()->setEnabled(true);
                 updateTable->removeRow(i);
                 updateTable->setMinimumHeight(tableHeight);
             }
@@ -165,22 +182,22 @@ void UpdatePage::strLenChanged()
         AppWidget* chLabelWidth = (AppWidget*)updateTable->cellWidget(i,0);
         if(sender() == chLabelWidth)
         {
-            chLabelWidth->introLabel->setText(chLabelWidth->introstr);
-            int labelWidth = chLabelWidth->introLabel->width();
+            chLabelWidth->getIntroLabel()->setText(chLabelWidth->getIntroStr());
+            int labelWidth = chLabelWidth->getIntroLabel()->width();
             QFont font;
             QFontMetrics fm(font);
-            int fontSize = fm.width(chLabelWidth->introstr);
-            QString fmstr = chLabelWidth->introstr;
-            labelWidth = updateTable->width() -520;
+            int fontSize = fm.width(chLabelWidth->getIntroStr());
+            QString fmstr = chLabelWidth->getIntroStr();
+            labelWidth = updateTable->width() - 520;
             if(labelWidth > 550)
             {
                 labelWidth = 550;
             }
             if(fontSize > labelWidth)
             {
-                fmstr = fm.elidedText(chLabelWidth->introstr, Qt::ElideRight, labelWidth-100);
+                fmstr = fm.elidedText(chLabelWidth->getIntroStr(), Qt::ElideRight, labelWidth-100);
             }
-            chLabelWidth->introLabel->setText(fmstr);
+            chLabelWidth->getIntroLabel()->setText(fmstr);
         }
     }
 }

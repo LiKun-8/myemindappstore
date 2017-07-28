@@ -14,13 +14,8 @@ class FuncWidget : public QWidget
     Q_OBJECT
 public:
     explicit FuncWidget(QWidget *parent, QString funcStr);
-    QPushButton *hideButton;
-    QHBoxLayout *funcLayout;
-    QVBoxLayout *leftLayout;
-    QVBoxLayout *rightLayout;
-    QLabel *funcLabel;
-    QTextEdit *nfuncEdit;
-//    QLabel *nfuncLabel;
+    QTextEdit * getNfuncEdit();
+    QPushButton * getHideButton();
 
 signals:
     int sigTextHeight(int);
@@ -29,6 +24,14 @@ public slots:
 private:
     QString funcText;
     bool event(QEvent *event);
+    QPushButton *hideButton;
+    QHBoxLayout *funcLayout;
+    QVBoxLayout *leftLayout;
+    QVBoxLayout *rightLayout;
+    QLabel *funcLabel;
+    QTextEdit *nfuncEdit;
+//    QLabel *nfuncLabel;
+
 };
 
 #endif // FUNCWIDGET_H

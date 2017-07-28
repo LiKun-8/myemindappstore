@@ -15,7 +15,7 @@ ManagerWidget::ManagerWidget(QWidget *parent,QString urlstr,QString namestr, QSt
 
     nameButton = new QPushButton();
     nameButton->setFlat(true);
-    nameButton->setMaximumWidth(100);
+    nameButton->setMaximumWidth(120);
     nameButton->setStyleSheet("text-align: left;");
     nameButton->setText(namestr);
 

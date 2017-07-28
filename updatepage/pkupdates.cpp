@@ -84,7 +84,6 @@ QStringList PkUpdates::getPacName() const
     return m_upNameList;
 }
 
-
 void PkUpdates::onPackage(PackageKit::Transaction::Info info, const QString &packageID, const QString &summary)
 {
     QString packageName = PackageKit::Transaction::packageName(packageID);
@@ -114,8 +113,6 @@ void PkUpdates::onGetPackages(PackageKit::Transaction::Info info, const QString 
         break;
     }
 }
-
-
 
 void PkUpdates::onFinished(PackageKit::Transaction::Exit status, uint runtime)
 {
@@ -233,5 +230,50 @@ void PkUpdates::getInstalled()
 void PkUpdates::sendUpdateData()
 {
     emit sigUpdateData(shareData->updateStrMap);
+}
+
+void PkUpdates::installUpdate(const QString &packageId)
+{
+    qDebug() << __FUNCTION__ << "packageId == " << packageId;
+
+    PackageKit::Transaction::TransactionFlag flag = PackageKit::Transaction::TransactionFlagOnlyTrusted;
+    m_installTrans = PackageKit::Daemon::updatePackage(packageId, flag);
+
+//    connect(m_installTran.data(), &PackageKit::Transaction::statusChanged, this, &PkUpdates::onStatusChanged);
+    connect(m_installTrans.data(), &PackageKit::Transaction::package, this, &PkUpdates::onPackageUpdating);
+    connect(m_installTrans.data(), &PackageKit::Transaction::finished, this, &PkUpdates::onFinished);
+
+}
+
+//void PkUpdates::installUpdates(const QStringList &packageIds, bool simulate, bool untrusted)
+//{
+//    qCDebug(PLASMA_PK_UPDATES) << "Installing updates" << packageIds << ", simulate:" << simulate << ", untrusted:" << untrusted;
+
+//    PackageKit::Transaction::TransactionFlags flags = PackageKit::Transaction::TransactionFlagOnlyTrusted;
+//    if (simulate)
+//    {
+//        flags |= PackageKit::Transaction::TransactionFlagSimulate;
+//    }
+//    else if (untrusted)
+//    {
+//        flags = PackageKit::Transaction::TransactionFlagNone;
+//    }
+
+//    m_installTrans = PackageKit::Daemon::updatePackages(packageIds, flags);
+//    m_installTrans->setProperty("packages", packageIds);
+//    setActivity(InstallingUpdates);
+
+//    connect(m_installTrans.data(), &PackageKit::Transaction::statusChanged, this, &PkUpdates::onStatusChanged);
+//    connect(m_installTrans.data(), &PackageKit::Transaction::finished, this, &PkUpdates::onFinished);
+//    connect(m_installTrans.data(), &PackageKit::Transaction::errorCode, this, &PkUpdates::onErrorCode);
+//    connect(m_installTrans.data(), &PackageKit::Transaction::package, this, &PkUpdates::onPackageUpdating);
+//    connect(m_installTrans.data(), &PackageKit::Transaction::requireRestart, this, &PkUpdates::onRequireRestart);
+//    connect(m_installTrans.data(), &PackageKit::Transaction::repoSignatureRequired, this, &PkUpdates::onRepoSignatureRequired);
+//}
+
+void PkUpdates::onPackageUpdating(PackageKit::Transaction::Info info, const QString &packageID)
+{
+    const uint percent = m_installTrans->percentage();
+    qDebug() << "Package updating:" << packageID << "percent == " << percent;
 }
 

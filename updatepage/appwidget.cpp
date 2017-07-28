@@ -7,7 +7,7 @@
 
 //#define SIZE_W 250
 
-AppWidget::AppWidget(QWidget *parent, QString headUrl, QString nameStr, QString sizeStr, QString verStr, QString logStr) : QWidget(parent),changeLog(logStr)
+AppWidget::AppWidget(QWidget *parent, QString headUrl, QString nameStr, QString sizeStr, QString verStr, QString logStr, QString pkgStr) : QWidget(parent),changeLog(logStr),pkgId(pkgStr)
 {
     appLayout = new QHBoxLayout();
     appLayout->setMargin(0);
@@ -84,6 +84,46 @@ void AppWidget::getImage(QString headUrl)
     request.setUrl(QUrl(headUrl));
     connect(imageUpdate, SIGNAL(finished(QNetworkReply *)), this, SLOT(getImageFinished(QNetworkReply *)));
     imageUpdate->get(request);
+}
+
+QPushButton* AppWidget::getHeadButton()
+{
+    return headButton;
+}
+
+QPushButton* AppWidget::getNameButton()
+{
+    return nameButton;
+}
+
+QPushButton* AppWidget::getFuncButton()
+{
+    return funcButton;
+}
+
+QPushButton* AppWidget::getUpdateButton()
+{
+    return updateButton;
+}
+
+QString AppWidget::getChangeLog()
+{
+    return changeLog;
+}
+
+QLabel *AppWidget::getIntroLabel()
+{
+    return introLabel;
+}
+
+QString AppWidget::getIntroStr()
+{
+    return introstr;
+}
+
+QString AppWidget::getPkgId()
+{
+    return pkgId;
 }
 
 void AppWidget::getImageFinished(QNetworkReply *reply)

@@ -12,16 +12,25 @@ class AppWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit AppWidget(QWidget *parent ,QString headUrl,QString nameStr,QString sizeStr,QString verStr,QString logStr);
+    explicit AppWidget(QWidget *parent ,QString headUrl,QString nameStr,QString sizeStr,QString verStr,QString logStr, QString pkgStr);
     bool event(QEvent *event);
     void getImage(QString headUrl);
+    QPushButton *getHeadButton();
+    QPushButton *getNameButton();
+    QPushButton *getFuncButton();
+    QPushButton *getUpdateButton();
+    QString getChangeLog();
+    QLabel *getIntroLabel();
+    QString getIntroStr();
+    QString getPkgId();
+
 signals:
     void sigIntroResize();
 
 private slots:
     void getImageFinished(QNetworkReply *reply);
 
-public:
+private:
     QHBoxLayout *appLayout;
     QVBoxLayout *rightLayout;
     QHBoxLayout *bottomLayout;
@@ -35,6 +44,7 @@ public:
     QPushButton *updateButton;
     QPixmap pix;
     QString changeLog;
+    QString pkgId;
     QNetworkAccessManager *imageUpdate;
 
 };

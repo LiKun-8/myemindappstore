@@ -20,6 +20,7 @@ public:
     int insCount() const;
     QStringList getPacName() const;
     QVariantMap packages() const;
+    void installUpdate(const QString &packageId);
 
     ShareData *shareData;
     JSONFUNC *jsonFunc;
@@ -41,6 +42,7 @@ private slots:
     void getUpRelease();
     void getInstalled();
     void sendUpdateData();
+    void onPackageUpdating(PackageKit::Transaction::Info info, const QString &packageID);
 private:
     void onChanged();
     void onUpdatesChanged();
@@ -48,7 +50,7 @@ private:
     QPointer<PackageKit::Transaction> m_updatesTrans;
     QPointer<PackageKit::Transaction> m_cacheTrans;
     QPointer<PackageKit::Transaction> m_packagesTrans;
-//    QPointer<PackageKit::Transaction> m_installTrans;
+    QPointer<PackageKit::Transaction> m_installTrans;
 //    QPointer<PackageKit::Transaction> m_detailTrans;
     QVariantMap m_updateList;
     QVariantMap m_packagesList;
